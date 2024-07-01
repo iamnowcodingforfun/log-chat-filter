@@ -1,20 +1,26 @@
 import os
+import time
+
+start_time = time.time()
 
 print("Started clearing old logs")
 
 def filter_log(input_file, output_file, texts_to_keep):
     try:
         # Read input file and filter lines
-        with open(input_file, 'r') as f_input:
+        with open(input_file, 'r', encoding='utf-8') as f_input:
             lines = f_input.readlines()
 
         filtered_lines = [line for line in lines if any(text in line for text in texts_to_keep)]
-        print("Writing to file..")
-        # Write filtered lines to output file
-        with open(output_file, 'w') as f_output:
-            f_output.writelines(filtered_lines)
+        chatresult = []  # Create an empty list to store the filtered lines without "Async Chat Thread" string
+        for string in filtered_lines:
+            chatresult.append(string.replace("[Async Chat Thread -", '').replace("/INFO]", '').replace(" - InteractiveChat: [Not Secure]", '').replace("[Craft Scheduler Thread - ", ''))
 
-        print(f"Filtered {input_file} and saved to {output_file}")
+        print("Writing to file..")
+        with open(output_file, 'w', encoding='utf-8') as f_output:
+            f_output.writelines(chatresult)
+
+        print(f"Filtered {input_file}")
 
     except FileNotFoundError:
         print(f"Error: File {input_file} not found")
@@ -43,8 +49,15 @@ def process_logs(texts_to_keep):
 # Example usage:
 texts_to_keep = [
     '[Async Chat Thread',
-    '[User Authenticator'
+    '[User Authenticator',
+    'InteractiveChat/INFO'
 ]  # Replace with the list of texts you want to keep
 
 process_logs(texts_to_keep)
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+print(f"done in: {elapsed_time} seconds")
+
+
 input('enter to quit ')
